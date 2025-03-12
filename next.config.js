@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // distDir: 'build',
+  distDir: 'build',
   reactStrictMode: true,
   experimental: {
     serverComponentsExternalPackages: ['pdf-lib']
