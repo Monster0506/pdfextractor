@@ -1,0 +1,218 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PDF Processing API",
+    "description": "A powerful API for extracting text and images from PDF files, with OCR capabilities using Tesseract.js and pdf.js",
+    "version": "1.0.0",
+    "contact": {
+      "name": "PDF Processing API Support"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "paths": {
+    "/api/process": {
+      "post": {
+        "summary": "Process a PDF file",
+        "description": "Extract text, images, or perform OCR on a PDF file",
+        "operationId": "processPdf",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "pdf": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The PDF file to process"
+                  },
+                  "format": {
+                    "type": "string",
+                    "enum": ["text", "markdown", "images", "ocr"],
+                    "default": "text",
+                    "description": "The desired output format"
+                  },
+                  "includeMetadata": {
+                    "type": "string",
+                    "enum": ["true", "false"],
+                    "default": "false",
+                    "description": "Whether to include file and processing metadata"
+                  },
+                  "includeImages": {
+                    "type": "string",
+                    "enum": ["true", "false"],
+                    "default": "false",
+                    "description": "Whether to include extracted images with text formats"
+                  }
+                },
+                "required": ["pdf"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "Extracted text content (for text, markdown, and ocr formats)"
+                    },
+                    "images": {
+                      "type": "array",
+                      "description": "Array of extracted images (when format is 'images' or includeImages is true)",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "data": {
+                            "type": "string",
+                            "format": "byte",
+                            "description": "Base64 encoded PNG image data"
+                          },
+                          "type": {
+                            "type": "string",
+                            "enum": ["page", "image"],
+                            "description": "Type of image (full page or embedded)"
+                          },
+                          "pageNumber": {
+                            "type": "integer",
+                            "description": "Page number where the image was found"
+                          },
+                          "width": {
+                            "type": "integer",
+                            "description": "Image width in pixels"
+                          },
+                          "height": {
+                            "type": "integer",
+                            "description": "Image height in pixels"
+                          }
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "File and processing metadata (when includeMetadata is true)",
+                      "properties": {
+                        "fileSize": {
+                          "type": "integer",
+                          "description": "Size of the PDF file in bytes"
+                        },
+                        "filename": {
+                          "type": "string",
+                          "description": "Original filename"
+                        },
+                        "timestamp": {
+                          "type": "string",
+                          "format": "date-time",
+                          "description": "Processing timestamp"
+                        },
+                        "processedWith": {
+                          "type": "string",
+                          "description": "Processing method used"
+                        },
+                        "extractionMethod": {
+                          "type": "string",
+                          "description": "Image extraction method used"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  }
+                },
+                "examples": {
+                  "noPdf": {
+                    "value": {
+                      "error": "No PDF file uploaded"
+                    }
+                  },
+                  "invalidFormat": {
+                    "value": {
+                      "error": "Invalid format specified"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method not allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Method not allowed"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Error message"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Error processing PDF: detailed error message"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error message"
+          }
+        },
+        "required": ["error"]
+      }
+    }
+  }
+}
